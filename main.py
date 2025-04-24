@@ -28,7 +28,8 @@ def find_max_number_of_builds(available_resources: Resources, costs: Resources) 
 def optimize_troops_coarse_then_fine(
         initial_resources: Resources, 
         troop1_cost: Resources, 
-        troop2_cost: Resources, 
+        troop2_cost: Resources,
+        ignore_crop: bool=False,
         step_size=10, 
         refine_window=10
     ) -> Tuple[int, int, int, Resources, Resources]:
@@ -46,7 +47,6 @@ def optimize_troops_coarse_then_fine(
         tuple: (best_n1, best_n2, min_remaining_sum, final_remaining_resources, final_cost)
                for the best combination found.
     """
-    NUMBER_OF_RESOURCES = 4
 
     best_n1_coarse = 0
     best_n2_coarse = 0
@@ -74,6 +74,7 @@ def optimize_troops_coarse_then_fine(
             total_cost = n1 * troop1_cost + n2 * troop2_cost
             if not (initial_resources - total_cost).has_negative_resources():
                 remaining_vector = initial_resources - total_cost
+                if ignore_crop: remaining_vector.crop = 0
                 current_remaining_sum = remaining_vector.sum()
                 current_abs_diff = abs(n1 - n2)
 
@@ -124,6 +125,7 @@ def optimize_troops_coarse_then_fine(
             # But check just in case of float issues / edge cases
             if not (initial_resources - total_cost).has_negative_resources():
                 remaining_vector = initial_resources - total_cost
+                if ignore_crop: remaining_vector.crop = 0
                 current_remaining_sum = remaining_vector.sum()
                 current_abs_diff = abs(n1 - n2)
 
@@ -147,10 +149,10 @@ def optimize_troops_coarse_then_fine(
 
 def main():
     my_resources = Resources(
-        5500,
-        3900,
-        7100,
-        3000, 
+        15600,
+        5400,
+        9800,
+        26000,
     )
 
     troop_costs_spartans = {
@@ -169,8 +171,9 @@ def main():
     print("\n--- Coarse+Fine Approach Result (Step=5, Window=5) ---")
     n1_cf, n2_cf, rem_cf, res_cf, cost_cf = optimize_troops_coarse_then_fine(
         my_resources, 
-        troop_costs_spartans[TroopsSpartans.ElpidaRider], 
-        troop_costs_spartans[TroopsSpartans.Shieldsman], 
+        troop_costs_spartans[TroopsSpartans.Twinsteel_Therion],
+        troop_costs_spartans[TroopsSpartans.CorinthianCrusher],
+        ignore_crop=True,
         step_size=5, 
         refine_window=5
     )
